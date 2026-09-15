@@ -5,54 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dexter AI XAUUSD News</title>
 <style>
-  body {
-    margin: 0;
-    background: #0b0f14;
-    color: #e6e6e6;
-    font-family: -apple-system, Roboto, Arial, sans-serif;
-    padding: 16px;
-  }
-  .header {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .header h1 {
-    margin: 0;
-    font-size: 22px;
-    color: #ffd166;
-  }
-  .live {
-    color: #4ade80;
-    font-size: 13px;
-  }
-  .card {
-    background: #151b23;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
-    border: 1px solid #232c37;
-  }
-  .card h2 {
-    font-size: 14px;
-    color: #9ca3af;
-    margin: 0 0 8px 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .big {
-    font-size: 20px;
-    font-weight: bold;
-  }
-  .countdown {
-    font-size: 26px;
-    color: #ffd166;
-    font-weight: bold;
-  }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    margin: 6px 0;
-  }
+  body { margin: 0; background: #0b0f14; color: #e6e6e6; font-family: -apple-system, Roboto, Arial, sans-serif; padding: 16px; }
+  .header { text-align: center; margin-bottom: 20px; }
+  .header h1 { margin: 0; font-size: 22px; color: #ffd166; }
+  .live { color: #4ade80; font-size: 13px; }
+  .card { background: #151b23; border-radius: 14px; padding: 16px; margin-bottom: 14px; border: 1px solid #232c37; }
+  .card h2 { font-size: 14px; color: #9ca3af; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px; }
+  .big { font-size: 20px; font-weight: bold; }
+  .countdown { font-size: 26px; color: #ffd166; font-weight: bold; }
+  .row { display: flex; justify-content: space-between; margin: 6px 0; }
+  #debug-output { word-break: break-all; font-size: 12px; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -90,20 +52,39 @@
     <div>3. NFP</div>
   </div>
 
-<div class="card">
-  <h2>Debug: Data Finnhub</h2>
-  <div id="debug-output">Loading...</div>
-</div>
+  <div class="card">
+    <h2>Debug: Data Finnhub &amp; FRED</h2>
+    <div id="debug-output">Loading...</div>
+  </div>
 
-<script>
-  const API_KEY = "dakpcr9r01qln1kfjmj0dakpcr9r01qln1kfjmjg";
-  fetch(`https://finnhub.io/api/v1/calendar/economic?token=${API_KEY}`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('debug-output').innerText = JSON.stringify(data).substring(0, 500);
-    })
-    .catch(err => {
-      document.getElementById('debug-output').innerText = "DATA UNAVAILABLE";
-    });
-</script></body>
-  </html>
+  <script>
+    const API_KEY = "dakpcr9r01qln1kfjmj0dakpcr9r01qln1kfjmjg";
+    const FRED_KEY = "b9572b598b56c32be8744feec0b40c57";
+
+    let debugText = "";
+
+    fetch(`https://finnhub.io/api/v1/calendar/economic?token=${API_KEY}`)
+      .then(res => res.json())
+      .then(data => {
+        debugText += "FINNHUB: " + JSON.stringify(data).substring(0, 300);
+        document.getElementById('debug-output').innerText = debugText;
+      })
+      .catch(err => {
+        debugText += "FINNHUB ERROR: " + err.message;
+        document.getElementById('debug-output').innerText = debugText;
+      });
+
+    fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=1&file_type=json&api_key=${FRED_KEY}`)
+      .then(res => res.json())
+      .then(data => {
+        debugText += " | FRED: " + JSON.stringify(data).substring(0, 300);
+        document.getElementById('debug-output').innerText = debugText;
+      })
+      .catch(err => {
+        debugText += " | FRED ERROR: " + err.message;
+        document.getElementById('debug-output').innerText = debugText;
+      });
+  </script>
+
+</body>
+</html>
