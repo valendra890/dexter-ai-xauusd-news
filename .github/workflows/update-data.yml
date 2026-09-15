@@ -1,0 +1,29 @@
+name: Update Economic Data
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch CPI data from FRED
+        run: |
+          mkdir -p data
+          curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/cpi.json
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/cpi.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update economic data"
+          git push
