@@ -53,36 +53,23 @@
   </div>
 
   <div class="card">
-    <h2>Debug: Data Finnhub &amp; FRED</h2>
+    <h2>Debug: Data FRED (CPI Asli)</h2>
     <div id="debug-output">Loading...</div>
   </div>
 
   <script>
-    const API_KEY = "dakpcr9r01qln1kfjmj0dakpcr9r01qln1kfjmjg";
     const FRED_KEY = "b9572b598b56c32be8744feec0b40c57";
 
-    let debugText = "";
+    const fredUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=1&file_type=json&api_key=${FRED_KEY}`;
+    const proxiedUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(fredUrl);
 
-    fetch(`https://finnhub.io/api/v1/calendar/economic?token=${API_KEY}`)
+    fetch(proxiedUrl)
       .then(res => res.json())
       .then(data => {
-        debugText += "FINNHUB: " + JSON.stringify(data).substring(0, 300);
-        document.getElementById('debug-output').innerText = debugText;
+        document.getElementById('debug-output').innerText = "FRED: " + JSON.stringify(data).substring(0, 400);
       })
       .catch(err => {
-        debugText += "FINNHUB ERROR: " + err.message;
-        document.getElementById('debug-output').innerText = debugText;
-      });
-
-    fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=1&file_type=json&api_key=${FRED_KEY}`)
-      .then(res => res.json())
-      .then(data => {
-        debugText += " | FRED: " + JSON.stringify(data).substring(0, 300);
-        document.getElementById('debug-output').innerText = debugText;
-      })
-      .catch(err => {
-        debugText += " | FRED ERROR: " + err.message;
-        document.getElementById('debug-output').innerText = debugText;
+        document.getElementById('debug-output').innerText = "FRED ERROR: " + err.message;
       });
   </script>
 
