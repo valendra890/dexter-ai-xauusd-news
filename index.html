@@ -14,7 +14,7 @@
   .big { font-size: 20px; font-weight: bold; }
   .countdown { font-size: 26px; color: #ffd166; font-weight: bold; }
   .row { display: flex; justify-content: space-between; margin: 6px 0; }
-  #debug-output { word-break: break-all; font-size: 12px; line-height: 1.6; }
+  .small-note { font-size: 11px; color: #6b7280; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -31,6 +31,13 @@
     <div class="countdown">00:25:30</div>
     <div class="row"><span>Impact</span><span>EXTREME</span></div>
     <div class="row"><span>XAUUSD Relevance</span><span>96/100</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Inflasi AS (CPI)</h2>
+    <div class="row"><span>Index Terakhir</span><span id="cpi-value">Loading...</span></div>
+    <div class="row"><span>Periode Data</span><span id="cpi-date">-</span></div>
+    <div class="small-note">Sumber: FRED (Federal Reserve Bank of St. Louis)</div>
   </div>
 
   <div class="card">
@@ -52,11 +59,6 @@
     <div>3. NFP</div>
   </div>
 
-  <div class="card">
-    <h2>Debug: Data FRED (CPI Asli)</h2>
-    <div id="debug-output">Loading...</div>
-  </div>
-
   <script>
     const FRED_KEY = "b9572b598b56c32be8744feec0b40c57";
 
@@ -66,10 +68,13 @@
     fetch(proxiedUrl)
       .then(res => res.json())
       .then(data => {
-        document.getElementById('debug-output').innerText = "FRED: " + JSON.stringify(data).substring(0, 400);
+        const obs = data.observations[0];
+        document.getElementById('cpi-value').innerText = obs.value;
+        document.getElementById('cpi-date').innerText = obs.date;
       })
       .catch(err => {
-        document.getElementById('debug-output').innerText = "FRED ERROR: " + err.message;
+        document.getElementById('cpi-value').innerText = "DATA UNAVAILABLE";
+        document.getElementById('cpi-date').innerText = "-";
       });
   </script>
 
