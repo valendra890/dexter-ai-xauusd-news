@@ -90,5 +90,20 @@
     <div>3. NFP</div>
   </div>
 
-</body>
+<div class="card">
+  <h2>Debug: Data Finnhub</h2>
+  <div id="debug-output">Loading...</div>
+</div>
+
+<script>
+  const API_KEY = "dakpcr9r01qln1kfjmj0dakpcr9r01qln1kfjmjg";
+  fetch(`https://finnhub.io/api/v1/calendar/economic?token=${API_KEY}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('debug-output').innerText = JSON.stringify(data).substring(0, 500);
+    })
+    .catch(err => {
+      document.getElementById('debug-output').innerText = "DATA UNAVAILABLE";
+    });
+</script></body>
   </html>
