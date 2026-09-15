@@ -63,9 +63,7 @@
     const FRED_KEY = "b9572b598b56c32be8744feec0b40c57";
 
     const fredUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=1&file_type=json&api_key=${FRED_KEY}`;
-    const proxiedUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(fredUrl);
-
-    fetch(proxiedUrl)
+    const proxiedUrl = `https://corsproxy.io/?url=` + encodeURIComponent(fredUrl);(proxiedUrl)
       .then(res => res.json())
       .then(data => {
         const obs = data.observations[0];
