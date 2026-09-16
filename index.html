@@ -56,9 +56,10 @@
 
   <div class="card">
     <h2>Market</h2>
-    <div class="row"><span>XAUUSD</span><span>DEMO MODE</span></div>
-    <div class="row"><span>DXY</span><span>DEMO MODE</span></div>
-    <div class="row"><span>US10Y</span><span>DEMO MODE</span></div>
+    <div class="row"><span>Gold (USD/oz)</span><span id="market-gold">Loading...</span></div>
+    <div class="row"><span>US 10Y Yield</span><span id="market-us10y">Loading...</span></div>
+    <div class="row"><span>USD Index (Broad)</span><span id="market-dxy">Loading...</span></div>
+    <div class="small-note">Gold &amp; US10Y: data harian resmi FRED. USD Index: indeks dolar The Fed (bukan DXY ICE, tapi konsep serupa).</div>
   </div>
 
   <div class="card">
@@ -153,7 +154,20 @@
         document.getElementById('ai-confidence').innerText = "-";
         document.getElementById('ai-reason').innerText = "Gagal memuat analisis AI.";
       });
+
+    fetch('data/market.json?t=' + Date.now())
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('market-gold').innerText = data.gold ? "$" + data.gold : "DATA UNAVAILABLE";
+        document.getElementById('market-us10y').innerText = data.us10y ? data.us10y + "%" : "DATA UNAVAILABLE";
+        document.getElementById('market-dxy').innerText = data.dxy || "DATA UNAVAILABLE";
+      })
+      .catch(err => {
+        document.getElementById('market-gold').innerText = "DATA UNAVAILABLE";
+        document.getElementById('market-us10y').innerText = "DATA UNAVAILABLE";
+        document.getElementById('market-dxy').innerText = "DATA UNAVAILABLE";
+      });
   </script>
 
 </body>
-  </html>
+</html>
