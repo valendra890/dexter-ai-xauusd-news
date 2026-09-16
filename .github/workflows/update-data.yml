@@ -22,7 +22,7 @@ jobs:
 
       - name: Fetch Market data (Gold, US10Y, USD Index)
         run: |
-          curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=GOLDPMGBD228NLBM&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/gold-raw.json
+          curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=PGOLDUSDM&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/gold-raw.json
           curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/us10y-raw.json
           curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=DTWEXBGS&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/dxy-raw.json
 
