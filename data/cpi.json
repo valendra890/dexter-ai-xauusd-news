@@ -1,6 +1,1 @@
-<html>
-<head><title>502 Bad Gateway</title></head>
-<body>
-<center><h1>502 Bad Gateway</h1></center>
-</body>
-</html>
+{"realtime_start":"2026-09-11","realtime_end":"2026-09-11","observation_start":"1600-01-01","observation_end":"9999-12-31","units":"lin","output_type":1,"file_type":"json","order_by":"observation_date","sort_order":"desc","count":956,"offset":0,"limit":2,"observations":[{"realtime_start":"2026-09-11","realtime_end":"2026-09-11","date":"2026-08-01","value":"334.131"},{"realtime_start":"2026-09-11","realtime_end":"2026-09-11","date":"2026-07-01","value":"332.813"}]}
