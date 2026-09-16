@@ -34,7 +34,11 @@ jobs:
           RESPONSE=$(curl -s https://api.groq.com/openai/v1/chat/completions \
             -H "Authorization: Bearer $GROQ_API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg prompt "$PROMPT" '{model: "llama-3.3-70b-versatile", messages: [{role: "user", content: $prompt}], temperature: 0.3}')")
+            -d "$(jq -n --arg prompt "$PROMPT" '{model: "openai/gpt-oss-120b", messages: [{role: "user", content: $prompt}], temperature: 0.3}')")
+
+          echo "=== RAW RESPONSE DARI GROQ (untuk debug) ==="
+          echo "$RESPONSE"
+          echo "=== END RAW RESPONSE ==="
 
           echo "$RESPONSE" | jq -r '.choices[0].message.content' > data/ai-analysis-raw.txt
           cat data/ai-analysis-raw.txt | tr -d '\n' | grep -o '{.*}' > data/ai-analysis.json || echo '{"bias":"Neutral","confidence":"Low","reason":"AI UNAVAILABLE"}' > data/ai-analysis.json
