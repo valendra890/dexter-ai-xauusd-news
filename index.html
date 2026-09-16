@@ -27,10 +27,11 @@
 
   <div class="card">
     <h2>Next Important News</h2>
-    <div class="big">CPI (USD)</div>
-    <div class="countdown">00:25:30</div>
-    <div class="row"><span>Impact</span><span>EXTREME</span></div>
-    <div class="row"><span>XAUUSD Relevance</span><span>96/100</span></div>
+    <div class="big" id="event-name">Loading...</div>
+    <div class="countdown" id="event-countdown">--:--:--</div>
+    <div class="row"><span>Impact</span><span id="event-impact">-</span></div>
+    <div class="row"><span>XAUUSD Relevance</span><span id="event-relevance">-</span></div>
+    <div class="small-note">Jadwal resmi dari BLS &amp; Federal Reserve</div>
   </div>
 
   <div class="card">
@@ -53,13 +54,61 @@
   </div>
 
   <div class="card">
-    <h2>Top News</h2>
-    <div>1. CPI</div>
-    <div>2. FOMC</div>
-    <div>3. NFP</div>
+    <h2>Top News (Jadwal Berikutnya)</h2>
+    <div id="top-news-list">Loading...</div>
   </div>
 
   <script>
+    const events = [
+      { name: "FOMC Rate Decision", currency: "USD", time: "2026-09-16T18:00:00Z", impact: "EXTREME", relevance: 98 },
+      { name: "NFP (Nonfarm Payrolls)", currency: "USD", time: "2026-10-02T12:30:00Z", impact: "EXTREME", relevance: 95 },
+      { name: "CPI (USD)", currency: "USD", time: "2026-10-14T12:30:00Z", impact: "EXTREME", relevance: 96 },
+      { name: "FOMC Rate Decision", currency: "USD", time: "2026-10-28T18:00:00Z", impact: "EXTREME", relevance: 98 }
+    ];
+
+    function getNextEvent() {
+      const now = new Date();
+      return events
+        .map(e => ({ ...e, dateObj: new Date(e.time) }))
+        .filter(e => e.dateObj > now)
+        .sort((a, b) => a.dateObj - b.dateObj);
+    }
+
+    function formatCountdown(ms) {
+      if (ms <= 0) return "SEDANG RILIS";
+      const totalSeconds = Math.floor(ms / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const pad = n => String(n).padStart(2, "0");
+      if (days > 0) return `${days}h ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    function updateCountdown() {
+      const upcoming = getNextEvent();
+      if (upcoming.length === 0) {
+        document.getElementById('event-name').innerText = "Tidak ada jadwal";
+        document.getElementById('event-countdown').innerText = "-";
+        return;
+      }
+      const next = upcoming[0];
+      document.getElementById('event-name').innerText = next.name + " (" + next.currency + ")";
+      document.getElementById('event-countdown').innerText = formatCountdown(next.dateObj - new Date());
+      document.getElementById('event-impact').innerText = next.impact;
+      document.getElementById('event-relevance').innerText = next.relevance + "/100";
+
+      const listHtml = upcoming.slice(0, 3).map((e, i) => {
+        const dateStr = e.dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        return `<div>${i + 1}. ${e.name} — ${dateStr}</div>`;
+      }).join("");
+      document.getElementById('top-news-list').innerHTML = listHtml || "Tidak ada jadwal mendatang";
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
     fetch('data/cpi.json?t=' + Date.now())
       .then(res => res.json())
       .then(data => {
