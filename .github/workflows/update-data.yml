@@ -15,10 +15,25 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Fetch CPI data from FRED (2 periode terakhir)
+      - name: Fetch CPI data from FRED
         run: |
           mkdir -p data
           curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=2&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/cpi.json
+
+      - name: Fetch Market data (Gold, US10Y, USD Index)
+        run: |
+          curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=GOLDPMGBD228NLBM&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/gold-raw.json
+          curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/us10y-raw.json
+          curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=DTWEXBGS&sort_order=desc&limit=1&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/dxy-raw.json
+
+          GOLD=$(jq -r '.observations[0].value' data/gold-raw.json)
+          US10Y=$(jq -r '.observations[0].value' data/us10y-raw.json)
+          DXY=$(jq -r '.observations[0].value' data/dxy-raw.json)
+
+          jq -n --arg gold "$GOLD" --arg us10y "$US10Y" --arg dxy "$DXY" \
+            '{gold: $gold, us10y: $us10y, dxy: $dxy}' > data/market.json
+
+          rm -f data/gold-raw.json data/us10y-raw.json data/dxy-raw.json
 
       - name: Generate AI Analysis via Groq
         env:
@@ -51,6 +66,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/cpi.json data/ai-analysis.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update economic data and AI analysis"
+          git add data/cpi.json data/ai-analysis.json data/market.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update economic and market data"
           git push
