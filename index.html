@@ -15,6 +15,11 @@
   .countdown { font-size: 26px; color: #ffd166; font-weight: bold; }
   .row { display: flex; justify-content: space-between; margin: 6px 0; }
   .small-note { font-size: 11px; color: #6b7280; margin-top: 8px; }
+  .bias-bullish { color: #4ade80; font-weight: bold; }
+  .bias-bearish { color: #f87171; font-weight: bold; }
+  .bias-neutral { color: #9ca3af; font-weight: bold; }
+  .bias-mixed { color: #fbbf24; font-weight: bold; }
+  .reason-text { font-size: 13px; color: #d1d5db; margin-top: 8px; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -35,6 +40,14 @@
   </div>
 
   <div class="card">
+    <h2>AI Analysis (CPI)</h2>
+    <div class="row"><span>Bias</span><span id="ai-bias">Loading...</span></div>
+    <div class="row"><span>Confidence</span><span id="ai-confidence">-</span></div>
+    <div class="reason-text" id="ai-reason">Menunggu data...</div>
+    <div class="small-note">Analisis AI, bukan sinyal trading. Keputusan tetap di tangan kamu.</div>
+  </div>
+
+  <div class="card">
     <h2>Inflasi AS (CPI)</h2>
     <div class="row"><span>Index Terakhir</span><span id="cpi-value">Loading...</span></div>
     <div class="row"><span>Periode Data</span><span id="cpi-date">-</span></div>
@@ -49,11 +62,6 @@
   </div>
 
   <div class="card">
-    <h2>AI Daily Summary</h2>
-    <div>DEMO MODE — Data akan tampil di sini setelah AI terhubung.</div>
-  </div>
-
-  <div class="card">
     <h2>Top News (Jadwal Berikutnya)</h2>
     <div id="top-news-list">Loading...</div>
   </div>
@@ -63,6 +71,7 @@
       { name: "FOMC Rate Decision", currency: "USD", time: "2026-09-16T18:00:00Z", impact: "EXTREME", relevance: 98 },
       { name: "NFP (Nonfarm Payrolls)", currency: "USD", time: "2026-10-02T12:30:00Z", impact: "EXTREME", relevance: 95 },
       { name: "CPI (USD)", currency: "USD", time: "2026-10-14T12:30:00Z", impact: "EXTREME", relevance: 96 },
+      { name: "PPI (Producer Price Index)", currency: "USD", time: "2026-10-15T12:30:00Z", impact: "HIGH", relevance: 85 },
       { name: "FOMC Rate Decision", currency: "USD", time: "2026-10-28T18:00:00Z", impact: "EXTREME", relevance: 98 }
     ];
 
@@ -99,7 +108,7 @@
       document.getElementById('event-impact').innerText = next.impact;
       document.getElementById('event-relevance').innerText = next.relevance + "/100";
 
-      const listHtml = upcoming.slice(0, 3).map((e, i) => {
+      const listHtml = upcoming.slice(0, 4).map((e, i) => {
         const dateStr = e.dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
         return `<div>${i + 1}. ${e.name} — ${dateStr}</div>`;
       }).join("");
@@ -120,7 +129,31 @@
         document.getElementById('cpi-value').innerText = "DATA UNAVAILABLE";
         document.getElementById('cpi-date').innerText = "-";
       });
+
+    function getBiasClass(bias) {
+      if (!bias) return "bias-neutral";
+      const b = bias.toLowerCase();
+      if (b.includes("bullish")) return "bias-bullish";
+      if (b.includes("bearish")) return "bias-bearish";
+      if (b.includes("mixed")) return "bias-mixed";
+      return "bias-neutral";
+    }
+
+    fetch('data/ai-analysis.json?t=' + Date.now())
+      .then(res => res.json())
+      .then(data => {
+        const biasEl = document.getElementById('ai-bias');
+        biasEl.innerText = data.bias || "AI UNAVAILABLE";
+        biasEl.className = getBiasClass(data.bias);
+        document.getElementById('ai-confidence').innerText = data.confidence || "-";
+        document.getElementById('ai-reason').innerText = data.reason || "Data tidak tersedia.";
+      })
+      .catch(err => {
+        document.getElementById('ai-bias').innerText = "AI UNAVAILABLE";
+        document.getElementById('ai-confidence').innerText = "-";
+        document.getElementById('ai-reason').innerText = "Gagal memuat analisis AI.";
+      });
   </script>
 
 </body>
-</html>
+  </html>
