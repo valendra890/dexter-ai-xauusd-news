@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Fetch CPI data from FRED (2 periode terakhir untuk hitung tren)
+      - name: Fetch CPI data from FRED (2 periode terakhir)
         run: |
           mkdir -p data
           curl -s "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=2&file_type=json&api_key=b9572b598b56c32be8744feec0b40c57" -o data/cpi.json
@@ -29,19 +29,23 @@ jobs:
           PREV_VALUE=$(jq -r '.observations[1].value' data/cpi.json)
           PREV_DATE=$(jq -r '.observations[1].date' data/cpi.json)
 
-          PROMPT="Kamu adalah analis ekonomi untuk trader emas (XAUUSD). Data CPI (Consumer Price Index) Amerika: periode $LATEST_DATE nilainya $LATEST_VALUE, periode sebelumnya ($PREV_DATE) nilainya $PREV_VALUE. Jelaskan dalam Bahasa Indonesia yang sederhana. JANGAN berikan sinyal Buy/Sell atau jaminan profit. Balas HANYA dalam format JSON persis seperti ini tanpa teks lain: {\"bias\": \"Potentially Bullish atau Potentially Bearish atau Neutral atau Mixed\", \"confidence\": \"High atau Medium atau Low\", \"reason\": \"penjelasan singkat 2-3 kalimat berdasarkan angka di atas, jelaskan efek ke USD dan Gold\"}"
+          PROMPT="Kamu adalah analis ekonomi untuk trader emas (XAUUSD). Data CPI Amerika: periode $LATEST_DATE nilainya $LATEST_VALUE, periode sebelumnya ($PREV_DATE) nilainya $PREV_VALUE. Jelaskan dalam Bahasa Indonesia sederhana. JANGAN beri sinyal Buy/Sell atau jaminan profit. Balas HANYA JSON persis format ini tanpa teks lain: {\"bias\": \"Potentially Bullish atau Potentially Bearish atau Neutral atau Mixed\", \"confidence\": \"High atau Medium atau Low\", \"reason\": \"penjelasan 2-3 kalimat berdasarkan angka di atas, efek ke USD dan Gold\"}"
 
           RESPONSE=$(curl -s https://api.groq.com/openai/v1/chat/completions \
             -H "Authorization: Bearer $GROQ_API_KEY" \
             -H "Content-Type: application/json" \
             -d "$(jq -n --arg prompt "$PROMPT" '{model: "openai/gpt-oss-120b", messages: [{role: "user", content: $prompt}], temperature: 0.3}')")
 
-          echo "=== RAW RESPONSE DARI GROQ (untuk debug) ==="
+          echo "=== RAW RESPONSE GROQ ==="
           echo "$RESPONSE"
-          echo "=== END RAW RESPONSE ==="
+          echo "=== END ==="
 
-          echo "$RESPONSE" | jq -r '.choices[0].message.content' > data/ai-analysis-raw.txt
+          echo "$RESPONSE" | jq -r '.choices[0].message.content' > data/ai-analysis-raw.txt 2>/dev/null
           cat data/ai-analysis-raw.txt | tr -d '\n' | grep -o '{.*}' > data/ai-analysis.json || echo '{"bias":"Neutral","confidence":"Low","reason":"AI UNAVAILABLE"}' > data/ai-analysis.json
+
+          if [ ! -s data/ai-analysis.json ]; then
+            echo '{"bias":"Neutral","confidence":"Low","reason":"AI UNAVAILABLE"}' > data/ai-analysis.json
+          fi
 
       - name: Commit and push if changed
         run: |
